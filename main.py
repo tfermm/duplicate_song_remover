@@ -16,33 +16,41 @@ for i in f:
    
  	if split == ("m4a"):
  		audio = MP4(i) 
- 
+  
  		x = audio.pprint()
  		bitrate = audio.info.bitrate
  		audioDecoded = x.encode('ascii', 'ignore').split('\n')
-
-		artist=""
-		name=""
- 		for j in audioDecoded:
+  
+ 		artist=""
+ 		name=""
+  		for j in audioDecoded:
  			temp = j.split("=")
  			tag = temp[0]
  			if tag == "nam":
  				temp[0] = "";
  				name = " ".join(temp).lstrip()
+				temp2 = music.get(artist)
+				if temp2.has_key(name):
+					if bitrate < temp2.get(name)["bitrate"]:
+						os.remove(i)
+					else:
+						os.remove(temp2.get(name)["location"])
+					print "duplicate"
  			elif tag == "ART":
  				temp[0] = "";
  				artist = " ".join(temp).lstrip()
-			if not music.has_key(artist):
-				music[artist] = {}
-			music[artist][name] = {}
-			music[artist][name]["name"] = name;
-			music[artist][name]["bitrate"] = bitrate;
-			music[artist][artist] = artist
+ 			if not music.has_key(artist):
+ 				music[artist] = {}
+ 			music[artist][name] = {}
+ 			music[artist][name]["name"] = name;
+ 			music[artist][name]["location"] = i;
+ 			music[artist][name]["bitrate"] = bitrate;
+ 			music[artist][artist] = artist
 for i in range(1, len(music)):
-	artist = music.keys()[i]
-	print music.keys()[i] + "\n"
-	songs = music.get(artist)
-	for i in range(2, len(songs)):
-		song = songs.keys()[i]
-		print "\t" + song
-	print "\n"
+ 	artist = music.keys()[i]
+ 	print music.keys()[i] + "\n"
+ 	songs = music.get(artist)
+ 	for i in range(2, len(songs)):
+ 		song = songs.keys()[i]
+ 		print "\t" + song
+ 	print "\n"
