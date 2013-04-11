@@ -1,8 +1,6 @@
 import unicodedata
 import mutagen
 from mutagen.mp4 import MP4
-from mutagen.id3 import ID3,TIT2
-from mutagen.easyid3 import EasyID3
 import os
 
 import glob
@@ -22,8 +20,13 @@ for i in f:
 		x = audio.pprint()
 		audio = x.encode('ascii', 'ignore').split('\n')
 		for j in audio:
+#			print j
 			temp = j.split("=")
-			if temp[0] == "nam":
+			tag = temp[0]
+			if tag == "nam":
 				temp[0] = "";
-				temp = " ".join(temp).lstrip()
-				print temp
+				name = " ".join(temp).lstrip()
+			elif tag == "ART":
+				temp[0] = "";
+				artist = " ".join(temp).lstrip()
+				print artist
