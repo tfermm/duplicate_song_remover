@@ -52,9 +52,10 @@ for i in f:
  			music[artist][name]["file_name"] = file_name;
  			music[artist][name]["location"] = i;
  			music[artist][name]["bitrate"] = bitrate;
- 			music[artist][artist] = artist
 	elif split2 == "mp3":
 		audio = MP3(i)
+
+ 		bitrate = audio.info.bitrate
 		x = audio.pprint().split('\n')
 		name=""
 		artist=""
@@ -64,9 +65,11 @@ for i in f:
 			if tag == "TIT2":
  				temp[0] = "";
  				name = " ".join(temp).lstrip().lower()
+				name = name.encode('ascii', 'ignore')
 			elif tag == "TPE1":
  				temp[0] = "";
  				artist = " ".join(temp).lstrip().lower()
+				artist = artist.encode('ascii', 'ignore')
 				if not music.has_key(artist):
 					music[artist] = {}
 				temp2 = music.get(artist)
@@ -76,20 +79,20 @@ for i in f:
  					else:
  						os.remove(temp2.get(name)["location"])
  					print "duplicate"
+			if not music.has_key(artist):
+					music[artist] = {}
+
  			music[artist][name] = {}
  			music[artist][name]["name"] = name;
  			music[artist][name]["file_name"] = file_name;
  			music[artist][name]["location"] = i;
  			music[artist][name]["bitrate"] = bitrate;
- 			music[artist][artist] = artist
-
-
 
 for i in range(1, len(music)):
  	artist = music.keys()[i]
  	print music.keys()[i] + "\n"
- 	songs = music.get(artist)
- 	for i in range(2, len(songs)):
- 		song = songs.keys()[i]
+	songs = music.get(artist)
+ 	for j in range(0, len(songs)):
+ 		song = songs.keys()[j]
  		print "\t" + song
  	print "\n"
