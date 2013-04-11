@@ -1,20 +1,26 @@
 import unicodedata
 import mutagen
 from mutagen.mp4 import MP4
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3 as ID3
 import os
  
 import glob
- 
-directory = "."
- 
+  
+directory = "./"
+  
 f = []
-f = glob.glob(directory + "/*.m4a")
+f = glob.glob(directory + "*.m4a")
+f = f + glob.glob(directory + "*.mp3")
 music = {}
 for i in f:
+	dir_len = directory.__len__()
+	file_name = i[dir_len:]
  	split = i.split(".")
- 	split = split[2]
-   
- 	if split == ("m4a"):
+ 	split2 = split[2]
+# section for m4a files
+# m4a in this case is iTunes
+ 	if split2 == ("m4a"):
  		audio = MP4(i) 
   
  		x = audio.pprint()
@@ -23,29 +29,62 @@ for i in f:
   
  		artist=""
  		name=""
-  		for j in audioDecoded:
+		for j in audioDecoded:
  			temp = j.split("=")
  			tag = temp[0]
  			if tag == "nam":
  				temp[0] = "";
- 				name = " ".join(temp).lstrip()
+ 				name = " ".join(temp).lstrip().lower()
 				temp2 = music.get(artist)
-				if temp2.has_key(name):
-					if bitrate < temp2.get(name)["bitrate"]:
-						os.remove(i)
-					else:
-						os.remove(temp2.get(name)["location"])
-					print "duplicate"
- 			elif tag == "ART":
+ 				if temp2.has_key(name):
+ 					if bitrate < temp2.get(name)["bitrate"]:
+ 						os.remove(i)
+ 					else:
+ 						os.remove(temp2.get(name)["location"])
+ 					print "duplicate"
+			elif tag == "ART":
  				temp[0] = "";
- 				artist = " ".join(temp).lstrip()
+ 				artist = " ".join(temp).lstrip().lower()
  			if not music.has_key(artist):
  				music[artist] = {}
  			music[artist][name] = {}
  			music[artist][name]["name"] = name;
+ 			music[artist][name]["file_name"] = file_name;
  			music[artist][name]["location"] = i;
  			music[artist][name]["bitrate"] = bitrate;
  			music[artist][artist] = artist
+	elif split2 == "mp3":
+		audio = MP3(i)
+		x = audio.pprint().split('\n')
+		name=""
+		artist=""
+		for j in x:
+ 			temp = j.split("=")
+ 			tag = temp[0]
+			if tag == "TIT2":
+ 				temp[0] = "";
+ 				name = " ".join(temp).lstrip().lower()
+			elif tag == "TPE1":
+ 				temp[0] = "";
+ 				artist = " ".join(temp).lstrip().lower()
+				if not music.has_key(artist):
+					music[artist] = {}
+				temp2 = music.get(artist)
+ 				if temp2.has_key(name):
+ 					if bitrate < temp2.get(name)["bitrate"]:
+ 						os.remove(i)
+ 					else:
+ 						os.remove(temp2.get(name)["location"])
+ 					print "duplicate"
+ 			music[artist][name] = {}
+ 			music[artist][name]["name"] = name;
+ 			music[artist][name]["file_name"] = file_name;
+ 			music[artist][name]["location"] = i;
+ 			music[artist][name]["bitrate"] = bitrate;
+ 			music[artist][artist] = artist
+
+
+
 for i in range(1, len(music)):
  	artist = music.keys()[i]
  	print music.keys()[i] + "\n"
