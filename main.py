@@ -13,6 +13,7 @@ f = []
 f = glob.glob(directory + "*.m4a")
 f = f + glob.glob(directory + "*.mp3")
 music = {}
+hadIssues = False
 for i in f:
 	try:
 		dir_len = directory.__len__()
@@ -22,9 +23,7 @@ for i in f:
 # section for m4a files
 # m4a in this case is iTunes
 		if split2 == ("m4a"):
-			audio = ID3(i) 
-			#audio = MP4(i) 
-			print audio  
+			audio = MP4(i) 
 			x = audio.pprint()
 			bitrate = audio.info.bitrate
 			audioDecoded = x.encode('ascii', 'ignore').split('\n')
@@ -39,11 +38,14 @@ for i in f:
 					name = " ".join(temp).lstrip().lower()
 					temp2 = music.get(artist)
 					if temp2.has_key(name):
+						print '"' + temp2.get(name)["location"] + '"' + " and " + '"' + i + '"' + " are duplicates"
 						if bitrate < temp2.get(name)["bitrate"]:
+							print "\tRemoving " + '"' + i + '"'
 							os.remove(i)
 						else:
+							print "\tRemoving " + '"' + temp2.get(name)["location"] + '"'
 							os.remove(temp2.get(name)["location"])
-						print "duplicate"
+						#print "duplicate"
 				elif tag == "ART":
 					temp[0] = "";
 					artist = " ".join(temp).lstrip().lower()
@@ -76,11 +78,14 @@ for i in f:
 						music[artist] = {}
 					temp2 = music.get(artist)
 					if temp2.has_key(name):
+						print temp2.get(name)["name"] + " and " + i + " are duplicates"
 						if bitrate < temp2.get(name)["bitrate"]:
+							print "\tRemoving " + '"' + i + '"'
 							os.remove(i)
 						else:
+							print "\tRemoving " + '"' + temp2.get(name)["location"] + '"'
 							os.remove(temp2.get(name)["location"])
-						print "duplicate"
+						#print "duplicate"
 				if not music.has_key(artist):
 						music[artist] = {}
 
@@ -91,7 +96,7 @@ for i in f:
 				music[artist][name]["bitrate"] = bitrate;
 	except:
 		badSongs.append(i)
-print "valid Songs"
+print "valid Songs\n"
 for i in range(1, len(music)):
  	artist = music.keys()[i]
  	print music.keys()[i] + "\n"
@@ -102,11 +107,17 @@ for i in range(1, len(music)):
  	print "\n"
 
 
-print "invalid songs path"
-file = open('errors.txt','w')
-file.close()
+
 for song in badSongs:
+	if not hadIssues:
+		print "invalid songs path"
+		file = open('errors.txt','w')
+		file.close()
+
+	hadIssues = True
 	file = open('errors.txt','a')
 	file.write(song)
-	print song
+	print "\t" + song
 	file.close()
+if hadIssues:
+	print "All songs that had issues are in errors.txt"
